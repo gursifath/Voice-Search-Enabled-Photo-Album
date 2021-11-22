@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Description: NA
+Resources:
+  LF1indexphotos:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: ./LF1_index_photos
+      Description: ''
+      MemorySize: 128
+      Timeout: 3
+      Role: "arn:aws:iam::178386020143:role/service-role/LF1_index_photos-role-48425lx9"
+      Events:
+        BucketEvent1:
+          Type: S3
+          Properties:
+            Bucket:
+              Ref: Bucket1
+            Events:
+              - 's3:ObjectCreated:*'
+        CloudWatchEvent1:
+          Type: CloudWatchEvent
+          Properties:
+            Pattern:
+              detail-type:
+                - AWS API Call via CloudTrail
+              source:
+                - aws.s3
+              detail:
+                eventSource:
+                  - s3.amazonaws.com
+                eventName:
+                  - PutObject
+                  - PutObjectAcl
+                requestParameters:
+                  bucketName:
+                    - storephotos3
+  Bucket1:
+    Type: 'AWS::S3::Bucket'
+
+  LF2searchphotos:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: ./LF2_search_photos
+      Description: ''
+      MemorySize: 128
+      Timeout: 3
+      Role: "arn:aws:iam::178386020143:role/service-role/LF2_search_photos-role-mrks3hoh"
+      Events:
+        CloudWatchEvent1:
+          Type: CloudWatchEvent
+          Properties:
+            Pattern:
+              detail-type:
+                - AWS API Call via CloudTrail
+              source:
+                - aws.autoscaling
+              detail:
+                eventSource:
+                  - autoscaling.amazonaws.com
+        Api1:
+          Type: Api
+          Properties:
+            Path: /search
+            Method: GET
+        Api2:
+          Type: Api
+          Properties:
+            Path: /LF2_search_photos
+            Method: ANY
